@@ -34,6 +34,7 @@ java -cp <output_directory_path>:<created_directory_path>/lib/logger_lib.jar com
     java -jar <created_directory_path>/Subtask2/message_sender.jar
    ```
 
-### After compile: 
+## After compile: 
 **_Separate .class file for each inner/nested/anonymous/local class_**
+
 ![compiled_classes.png](compiled_classes.png)
