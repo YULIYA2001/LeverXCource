@@ -1,6 +1,6 @@
-package com.subtask2;
+package com.subtask3;
 
-public class TestDifferentClassesTypes {
+public class TestLambdaAndAnonymous {
 
     public static void main(String[] args) {
         MessageSender sender = new MessageSender("Sender");

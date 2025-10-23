@@ -7,16 +7,16 @@ if "%OUTPUT_DIR%"=="" set OUTPUT_DIR=out
 
 rem compile and run
 echo Compile: %PATH_TO_SRC%\src\com\...
-javac -cp %PATH_TO_SRC%\..\lib\logger_lib.jar -d %PATH_TO_SRC%\%OUTPUT_DIR% %PATH_TO_SRC%\src\com\subtask2\*.java
+javac -cp %PATH_TO_SRC%\..\lib\logger_lib.jar -d %PATH_TO_SRC%\%OUTPUT_DIR% %PATH_TO_SRC%\src\com\subtask3\*.java
 
-echo Run: com.subtask2.TestDifferentClassesTypes
+echo Run: com.subtask3.TestLambdaAndAnonymous
 echo.
-java -cp "%PATH_TO_SRC%\%OUTPUT_DIR%;%PATH_TO_SRC%\..\lib\logger_lib.jar" com.subtask2.TestDifferentClassesTypes
+java -cp "%PATH_TO_SRC%\%OUTPUT_DIR%;%PATH_TO_SRC%\..\lib\logger_lib.jar" com.subtask3.TestLambdaAndAnonymous
 
 rem create executable jar
 echo.
 echo Create: "manifest.txt" file for executable jar
-echo Main-Class: com.subtask2.TestDifferentClassesTypes > %PATH_TO_SRC%\manifest.txt
+echo Main-Class: com.subtask3.TestLambdaAndAnonymous > %PATH_TO_SRC%\manifest.txt
 echo Class-Path: ..\lib\logger_lib.jar >> %PATH_TO_SRC%\manifest.txt
 
 echo Create: executable "message_sender.jar" file
