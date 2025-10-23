@@ -1,7 +1,7 @@
 # Homework 1 subtasks:
 + #### [External library usage](https://github.com/YULIYA2001/LeverXCource/tree/homework1-main/Homework1_Subtasks/Subtask1)
 + #### [Inner, nested, anonymous, local classes usage](https://github.com/YULIYA2001/LeverXCource/tree/homework1-main/Homework1_Subtasks/Subtask2)
-+ #### [Lambda expressions and anonymous classes instead of inner, nested, anonymous, local classes](#)
++ #### [Lambda expressions and anonymous classes instead of inner, nested, anonymous, local classes](https://github.com/YULIYA2001/LeverXCource/tree/homework1-subtask3-lambda/Homework1_Subtasks/Subtask3)
 
 ### These programs use previous Simple Logger Library (_[see Simple Logger](https://github.com/YULIYA2001/LeverXCource/tree/homework1-main/Homework1)_).
 
