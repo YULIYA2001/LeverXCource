@@ -1,5 +1,5 @@
 # External library usage
-#### To start using script (_[see README](https://github.com/YULIYA2001/LeverXCource/tree/homework1-main/Homework1-Subclasses/README.md)_).
+#### To start using script (_[see shared README](https://github.com/YULIYA2001/LeverXCource/tree/homework1-main/Homework1_Subtasks)_).
 
 ### To start the program manually:
 
