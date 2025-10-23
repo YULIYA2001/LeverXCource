@@ -1,6 +1,7 @@
 package com.subtask1;
 
-import com.simple.logger.*;
+import com.simple.logger.ConsoleLogger;
+import com.simple.logger.Logger;
 
 public class TestExternalLibrary {
     public static final Logger LOGGER = ConsoleLogger.getLogger(TestExternalLibrary.class);
