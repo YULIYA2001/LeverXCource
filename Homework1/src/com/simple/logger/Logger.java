@@ -9,17 +9,33 @@ public abstract class Logger {
         this.name = clazz.getSimpleName();
     }
 
+    public void trace(String message) {
+        log(LogLevel.TRACE, message);
+    }
+
+    public void debug(String message) {
+        log(LogLevel.DEBUG, message);
+    }
+
     public void info(String message) {
-        log("INFO", message);
+        log(LogLevel.INFO, message);
+    }
+
+    public void warn(String message) {
+        log(LogLevel.WARN, message);
     }
 
     public void error(String message) {
-        log("ERROR", message);
+        log(LogLevel.ERROR, message);
     }
 
-    protected String formLogString(String level, String message) {
-        return String.format("[%s] %s %s: %s", LocalTime.now(), level, name, message);
+    public void fatal(String message) {
+        log(LogLevel.FATAL, message);
     }
 
-    protected abstract void log(String level, String message);
+    protected String formLogString(LogLevel level, String message) {
+        return "[%s] %s %s: %s".formatted(LocalTime.now(), level.toString(), name, message);
+    }
+
+    protected abstract void log(LogLevel level, String message);
 }

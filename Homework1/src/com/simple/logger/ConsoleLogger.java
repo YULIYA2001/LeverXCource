@@ -6,7 +6,7 @@ public class ConsoleLogger extends Logger {
     }
 
     @Override
-    protected void log(String level, String message) {
+    protected void log(LogLevel level, String message) {
         System.out.println(formLogString(level, message));
     }
 
