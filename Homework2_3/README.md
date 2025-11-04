@@ -12,3 +12,6 @@ After all orders are processed, run analytics in parallel (parallelStream) to sh
 - the top 3 best-selling products.
 
 ### Program output example:
+![result-part-1.png](result_p1.png)
+![result-part-2.png](result_p2.png)
+![result-part-3.png](result_p3.png)

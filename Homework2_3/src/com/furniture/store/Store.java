@@ -26,34 +26,41 @@ public class Store implements OrderConsumer, OrderProducer {
         return orderQueue;
     }
 
-    public void processOrder(Order order, String workerName) {
+    public void processOrder(Order order, String workerName) throws InterruptedException {
+        Thread.sleep(Randomizer.processOrderTimeout());
+        Map<Product, Integer> deductions = new HashMap<>();
+        List<Product> outOfStock = new ArrayList<>();
+
         try {
-            Thread.sleep(Randomizer.processOrderTimeout());
+            boolean success = order.getItems().entrySet().stream()
+                    .allMatch(item -> warehouse.computeIfPresent(
+                            item.getKey(), (product, currentStock) -> {
+                                if (currentStock >= item.getValue()) {
+                                    deductions.put(product, item.getValue());
+                                    return currentStock - item.getValue();
+                                }
+                                outOfStock.add(product);
+                                return currentStock;
+                            }) != null && deductions.containsKey(item.getKey()));
 
-            // TODO гонка
-
-            Optional<Product> outOfStockItem = order.getItems().entrySet().stream()
-                    .filter(i -> warehouse.getOrDefault(i.getKey(), 0) < i.getValue())
-                    .map(Map.Entry::getKey)
-                    .findFirst();
-
-            if (outOfStockItem.isPresent()) {
+            if (!success) {
+                rollbackDeductions(deductions);
                 System.out.printf("Process (%s): FAIL - #%d. %s out of stock%n",
-                        workerName, order.getOrderId(), outOfStockItem.get());
-                return;
+                        workerName, order.getOrderId(), outOfStock);
+            } else {
+                processedOrders.add(order);
+                System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
             }
-
-            order.getItems().forEach((product, quantity) ->
-                    warehouse.compute(product, (_, old) ->
-                            old != null && old >= quantity ? Integer.valueOf(old - quantity) : old
-                    )
-            );
-
-            System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
-            processedOrders.add(order);
-        } catch (InterruptedException _) {
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            rollbackDeductions(deductions);
+            throw e;
         }
+    }
+
+    private void rollbackDeductions(Map<Product, Integer> deductions) {
+        deductions.forEach((product, quantity) ->
+                warehouse.computeIfPresent(product, (_, stock) -> stock + quantity)
+        );
     }
 
     public void submitOrder(Order order) {
@@ -91,7 +98,7 @@ public class Store implements OrderConsumer, OrderProducer {
                     .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
                     .limit(3)
                     .collect(Collectors.toMap(
-                            Map.Entry::getKey, Map.Entry::getValue,  (a, _) -> a,
+                            Map.Entry::getKey, Map.Entry::getValue, (a, _) -> a,
                             LinkedHashMap::new)
                     );
 
