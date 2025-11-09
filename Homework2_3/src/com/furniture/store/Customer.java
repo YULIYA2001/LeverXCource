@@ -1,6 +1,10 @@
 package com.furniture.store;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class Customer implements Runnable {
     private final String customerName;

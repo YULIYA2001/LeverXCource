@@ -2,7 +2,9 @@ package com.furniture.store;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Test {
     public static final String STAR_SEPARATOR = "*******************************";
