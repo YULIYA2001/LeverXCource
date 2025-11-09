@@ -1,4 +1,6 @@
-package com.furniture.store;
+package com.furniture.store.util;
+
+import com.furniture.store.model.Product;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

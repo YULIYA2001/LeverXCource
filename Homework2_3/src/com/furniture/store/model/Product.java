@@ -1,4 +1,4 @@
-package com.furniture.store;
+package com.furniture.store.model;
 
 import java.math.BigDecimal;
 

@@ -1,14 +1,18 @@
-package com.furniture.store;
+package com.furniture.store.service;
+
+import com.furniture.store.core.OrderConsumer;
+import com.furniture.store.model.Order;
+import com.furniture.store.model.Worker;
 
 import java.util.concurrent.BlockingQueue;
 
-class Worker implements Runnable {
-    private final String workerName;
+public class WorkerExecutor implements Runnable {
+    private final Worker worker;
     private final OrderConsumer orderConsumer;
     private final BlockingQueue<Order> queue;
 
-    public Worker(String workerName, OrderConsumer orderConsumer, BlockingQueue<Order> queue) {
-        this.workerName = workerName;
+    public WorkerExecutor(Worker worker, OrderConsumer orderConsumer, BlockingQueue<Order> queue) {
+        this.worker = worker;
         this.orderConsumer = orderConsumer;
         this.queue = queue;
     }
@@ -18,7 +22,7 @@ class Worker implements Runnable {
         try {
             while (true) {
                 Order order = queue.take();
-                orderConsumer.processOrder(order, workerName);
+                orderConsumer.processOrder(order, worker.workerName());
             }
         } catch (InterruptedException _) {
             Thread.currentThread().interrupt();

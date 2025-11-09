@@ -1,4 +1,8 @@
-package com.furniture.store;
+package com.furniture.store.core;
+
+import com.furniture.store.model.Order;
+import com.furniture.store.model.Product;
+import com.furniture.store.util.Randomizer;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -78,7 +82,7 @@ public class Store implements OrderConsumer, OrderProducer {
         }
     }
 
-    class Analytics {
+    public class Analytics {
         public void runAnalytics() {
             System.out.println("\nAnalytics\n----------------------------------");
 

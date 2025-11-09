@@ -1,5 +1,12 @@
 package com.furniture.store;
 
+import com.furniture.store.core.Store;
+import com.furniture.store.model.Customer;
+import com.furniture.store.model.Product;
+import com.furniture.store.model.Worker;
+import com.furniture.store.service.CustomerOrderExecutor;
+import com.furniture.store.service.WorkerExecutor;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -30,16 +37,16 @@ public class Test {
         ExecutorService executor = Executors.newFixedThreadPool(WORKERS_COUNT + CUSTOMERS_COUNT);
 
         for (int i = 0; i < WORKERS_COUNT; i++) {
-            executor.execute(new Worker(
-                    "Worker-" + (i + 1),
+            executor.execute(new WorkerExecutor(
+                    new Worker("Worker-" + (i + 1)),
                     store,
                     store.getOrderQueue()
             ));
         }
 
         for (int i = 0; i < CUSTOMERS_COUNT; i++) {
-            executor.execute(new Customer(
-                    "Customer-" + (i + 1),
+            executor.execute(new CustomerOrderExecutor(
+                    new Customer("Customer-" + (i + 1)),
                     store,
                     catalog
             ));
