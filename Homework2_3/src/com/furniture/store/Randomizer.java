@@ -19,6 +19,10 @@ public class Randomizer {
     private static final int MAX_PRODUCT_PRICE = 1000;
     private static final int MAX_ITEMS_IN_ORDER = 3;
     private static final int MAX_PRODUCT_QUANTITY_IN_ORDER = 6;
+    private static final int MIN_PO_TIMEOUT = 100;
+    private static final int MAX_PO_TIMEOUT = 500;
+    private static final int MIN_CO_TIMEOUT = 500;
+    private static final int MAX_CO_TIMEOUT = 1000;
 
     public static Map<Product, Integer> getProductsWithQuantity() {
         return PRODUCT_NAMES.stream()
@@ -38,11 +42,11 @@ public class Randomizer {
     }
 
     public static long processOrderTimeout() {
-        return getRandomInt(100, 500);
+        return getRandomInt(MIN_PO_TIMEOUT, MAX_PO_TIMEOUT);
     }
 
     public static long creationOrderTimeout() {
-        return getRandomInt(500, 1000);
+        return getRandomInt(MIN_CO_TIMEOUT, MAX_CO_TIMEOUT);
     }
 
     private static BigDecimal getProductPrice() {
