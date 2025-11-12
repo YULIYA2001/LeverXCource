@@ -15,3 +15,13 @@ After all orders are processed, run analytics in parallel (parallelStream) to sh
 ![result-part-1.png](result_p1.png)
 ![result-part-2.png](result_p2.png)
 ![result-part-3.png](result_p3.png)
+
+### Additional requirement:
+Add reservation functionality:
+- Products can be reserved by a customer, but no order is created, and no one else can buy them.
+- Product reservations can be deleted, making the products available to other customers again.
+
+### Program output example:
+![reservation-part-1.png](reservation-p1.png)
+![reservation-part-2.png](reservation-p2.png)
+![reservation-part-3.png](reservation-p3.png)
