@@ -37,48 +37,103 @@ public class Store implements OrderConsumer, OrderProducer {
 
     public void processOrder(Order order, String workerName) throws InterruptedException {
         Thread.sleep(Randomizer.processOrderTimeout());
-        Map<Product, Integer> deductions = new HashMap<>();
-        List<Product> outOfStock = new ArrayList<>();
 
-        try {
-            boolean success = order.getItems().entrySet().stream()
-                    .allMatch(item -> warehouse.computeIfPresent(
-                            item.getKey(), (product, currentStock) -> {
-                                if (currentStock >= item.getValue()) {
-                                    deductions.put(product, item.getValue());
-                                    return currentStock - item.getValue();
-                                }
-                                outOfStock.add(product);
-                                return currentStock;
-                            }) != null && deductions.containsKey(item.getKey()));
+        if (!order.isReservation()) {
+            ProcessingResult processingResult = null;
+            try {
+                processingResult = processing(order);
 
-            if (!success) {
-                rollbackDeductions(deductions);
-                System.out.printf("Process (%s): FAIL - #%d. %s out of stock%n",
-                        workerName, order.getOrderId(), outOfStock);
-            } else {
-                processedOrders.add(order);
-                System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
+                if (!processingResult.isSuccess) {
+                    processingResult.rollbackDeductions();
+                    System.out.printf("Process (%s): FAIL - #%d. %s out of stock%n",
+                            workerName, order.getOrderId(), processingResult.outOfStock);
+                } else {
+                    processedSuccessfully(order, workerName);
+                }
+            } catch (Exception e) {
+                if (processingResult != null) {
+                    processingResult.rollbackDeductions();
+                }
+                throw e;
             }
-        } catch (Exception e) {
-            rollbackDeductions(deductions);
-            throw e;
+        } else {
+            processedSuccessfully(order, workerName);
         }
     }
 
-    private void rollbackDeductions(Map<Product, Integer> deductions) {
-        deductions.forEach((product, quantity) ->
-                warehouse.computeIfPresent(product, (_, stock) -> stock + quantity)
-        );
+    private void processedSuccessfully(Order order, String workerName) {
+        processedOrders.add(order);
+        System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
     }
 
-    public void submitOrder(Order order) {
-        try {
-            Thread.sleep(Randomizer.creationOrderTimeout());
-            System.out.println("Submitted: " + order);
+    public void submit(Order order) throws InterruptedException {
+        Thread.sleep(Randomizer.creationOrderTimeout());
+        if (order.isReservation()) {
+            ProcessingResult processingResult = null;
+            try {
+                processingResult = processing(order);
+                if (!processingResult.isSuccess) {
+                    processingResult.rollbackDeductions();
+                    System.out.printf("Reservation: FAIL. %s out of stock. %s%n",
+                            processingResult.outOfStock, order);
+                } else {
+                    System.out.printf("Reservation: SUCCESS. %s%n", order);
+                }
+            } catch (Exception e) {
+                if (processingResult != null) {
+                    processingResult.rollbackDeductions();
+                }
+                throw e;
+            }
+        } else {
+            System.out.println("Order: " + order);
             orderQueue.put(order);
-        } catch (InterruptedException _) {
-            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void cancelReservation(Order order) {
+        order.getItems().forEach((product, quantity) ->
+                warehouse.computeIfPresent(product, (_, stock) -> stock + quantity));
+        System.out.printf("Reservation: Cancelled. %s%n", order);
+    }
+
+    public void submitReservation(Order order) throws InterruptedException {
+        orderQueue.put(order);
+        System.out.printf("Reservation: Submitted. %s%n", order);
+    }
+
+    private ProcessingResult processing(Order order) {
+        Map<Product, Integer> deductions = new HashMap<>();
+        List<Product> outOfStock = new ArrayList<>();
+
+        boolean success = order.getItems().entrySet().stream()
+                .allMatch(item -> warehouse.computeIfPresent(
+                        item.getKey(), (product, currentStock) -> {
+                            if (currentStock >= item.getValue()) {
+                                deductions.put(product, item.getValue());
+                                return currentStock - item.getValue();
+                            }
+                            outOfStock.add(product);
+                            return currentStock;
+                        }) != null && deductions.containsKey(item.getKey()));
+
+        return new ProcessingResult(success, deductions, outOfStock);
+    }
+
+    private class ProcessingResult {
+        private final boolean isSuccess;
+        private final Map<Product, Integer> deductions;
+        private final List<Product> outOfStock;
+
+        ProcessingResult(boolean isSuccess, Map<Product, Integer> deductions, List<Product> outOfStock) {
+            this.isSuccess = isSuccess;
+            this.deductions = deductions;
+            this.outOfStock = outOfStock;
+        }
+
+        void rollbackDeductions() {
+            deductions.forEach((product, quantity) ->
+                    warehouse.computeIfPresent(product, (_, stock) -> stock + quantity));
         }
     }
 
@@ -88,6 +143,10 @@ public class Store implements OrderConsumer, OrderProducer {
 
             long processedOrdersCount = processedOrders.size();
             System.out.println("The total number of success orders: " + processedOrdersCount);
+
+            long submittedReservationsCount = processedOrders.parallelStream()
+                    .filter(Order::isReservation).count();
+            System.out.println("The total number of submitted reservations: " + submittedReservationsCount);
 
             BigDecimal totalProfit = processedOrders.parallelStream()
                     .flatMap(order -> order.getItems().entrySet().stream())

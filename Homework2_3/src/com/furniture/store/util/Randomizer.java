@@ -25,6 +25,8 @@ public class Randomizer {
     private static final int MAX_PO_TIMEOUT = 500;
     private static final int MIN_CO_TIMEOUT = 500;
     private static final int MAX_CO_TIMEOUT = 1000;
+    private static final int MIN_D_TIMEOUT = 500;
+    private static final int MAX_D_TIMEOUT = 1000;
 
     public static Map<Product, Integer> getProductsWithQuantity() {
         return PRODUCT_NAMES.stream()
@@ -51,6 +53,18 @@ public class Randomizer {
         return getRandomInt(MIN_CO_TIMEOUT, MAX_CO_TIMEOUT);
     }
 
+    public static long customerDecisionTimeout() {
+        return getRandomInt(MIN_D_TIMEOUT, MAX_D_TIMEOUT);
+    }
+
+    public static boolean isReservation() {
+        return getRandomBoolean();
+    }
+
+    public static boolean isDecisionToCancel() {
+        return getRandomBoolean();
+    }
+
     private static BigDecimal getProductPrice() {
         double value = ThreadLocalRandom.current().nextDouble(MIN_PRODUCT_PRICE, MAX_PRODUCT_PRICE);
         return BigDecimal.valueOf(value).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
@@ -58,6 +72,10 @@ public class Randomizer {
 
     private static int getRandomInt(int min, int max) {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
+
+    private static boolean getRandomBoolean() {
+        return ThreadLocalRandom.current().nextBoolean();
     }
 
     private Randomizer() {}

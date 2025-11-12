@@ -32,7 +32,23 @@ public class CustomerOrderExecutor implements Runnable {
             int quantity = Randomizer.getOrderItemQuantity();
             items.put(p, quantity);
         }
+        boolean isReservation = Randomizer.isReservation();
 
-        orderProducer.submitOrder(new Order(customer.customerName(), items));
+        try {
+            Order order = new Order(customer.customerName(), items, isReservation);
+            orderProducer.submit(order);
+            if (isReservation) {
+                Thread.sleep(Randomizer.customerDecisionTimeout());
+                if (Randomizer.isDecisionToCancel()) {
+                    orderProducer.cancelReservation(order);
+                }
+                else {
+                    orderProducer.submitReservation(order);
+                }
+
+            }
+        } catch (InterruptedException _) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
