@@ -31,6 +31,8 @@ public class ReservationAnalyticsAspect {
     public void runAnalytics() {
         System.out.println("\nReservation analytics\n----------------------------------");
 
+        System.out.println("The total number of canceled reservations: " + canceledReservations.size());
+
         Map<Product, Integer> maxReservedQuantityAmongReservations = Stream.concat(
                         processedOrders.stream().filter(ReservedOrder.class::isInstance),
                         canceledReservations.stream()

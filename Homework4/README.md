@@ -18,3 +18,8 @@ Homework is based on previous one ([Furniture store](https://github.com/YULIYA20
 ![result_p1.png](result_p1.png)
 ![result_p2.png](result_p2.png)
 ![result_p3.png](result_p3.png)
+
+### Program with reservation output example:
+![result_wr_p1.png](result_wr_p1.png)
+![result_wr_p2.png](result_wr_p2.png)
+![result_wr_p3.png](result_wr_p3.png)
