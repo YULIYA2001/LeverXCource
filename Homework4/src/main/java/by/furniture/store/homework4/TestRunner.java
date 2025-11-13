@@ -5,6 +5,7 @@ import by.furniture.store.homework4.model.Product;
 import by.furniture.store.homework4.model.Worker;
 import by.furniture.store.homework4.service.CustomerService;
 import by.furniture.store.homework4.service.WorkerService;
+import by.furniture.store.homework4.util.Printable;
 import by.furniture.store.homework4.util.Randomizer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -64,19 +65,11 @@ public class TestRunner implements CommandLineRunner {
         System.out.println("Workers count: " + Randomizer.WORKERS_COUNT);
         System.out.println("Order queue length: " + Randomizer.ORDERS_QUEUE_LENGTH);
         System.out.println(DASH_SEPARATOR);
-        System.out.println("Warehouse: \n" + getPrintableWarehouse());
+        System.out.println("Warehouse: \n" + Printable.getPrintableMap(warehouse));
     }
 
     private void printStoreFinishInfo() {
         System.out.println("\n" + STAR_SEPARATOR + "\nFurniture store finished\n" + STAR_SEPARATOR);
-        System.out.println("Warehouse: \n" + getPrintableWarehouse());
-    }
-
-    private String getPrintableWarehouse() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Product, Integer> entry : warehouse.entrySet()) {
-            sb.append("- ").append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-        }
-        return sb.toString();
+        System.out.println("Warehouse: \n" + Printable.getPrintableMap(warehouse));
     }
 }

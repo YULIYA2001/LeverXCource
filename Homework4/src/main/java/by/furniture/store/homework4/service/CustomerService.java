@@ -3,6 +3,7 @@ package by.furniture.store.homework4.service;
 import by.furniture.store.homework4.model.Customer;
 import by.furniture.store.homework4.model.Order;
 import by.furniture.store.homework4.model.Product;
+import by.furniture.store.homework4.model.ReservedOrder;
 import by.furniture.store.homework4.util.Randomizer;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,12 @@ import java.util.Map;
 @Service
 public class CustomerService {
     private final OrderProducer orderProducer;
+    private final ReservationOrderProducer reservationOrderProducer;
     private final List<Product> catalog;
 
-    public CustomerService(OrderProducer orderProducer, List<Product> catalog) {
+    public CustomerService(OrderProducer orderProducer, ReservationOrderProducer reservationOrderProducer, List<Product> catalog) {
         this.orderProducer = orderProducer;
+        this.reservationOrderProducer = reservationOrderProducer;
         this.catalog = catalog;
     }
 
@@ -35,6 +38,28 @@ public class CustomerService {
             items.put(p, quantity);
         }
 
+        if (Randomizer.isReservation()) {
+            handleReservation(customer, items);
+            return;
+        }
+
         orderProducer.submitOrder(new Order(customer.customerName(), items));
+    }
+
+    private void handleReservation(Customer customer, Map<Product, Integer> items) {
+        try {
+            ReservedOrder order = new ReservedOrder(customer.customerName(), items);
+            reservationOrderProducer.takeReservation(order);
+
+            Thread.sleep(Randomizer.customerDecisionTimeout());
+
+            if (Randomizer.isDecisionToCancel()) {
+                reservationOrderProducer.cancelReservation(order);
+            } else {
+                orderProducer.submitOrder(order);
+            }
+        } catch (InterruptedException _) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

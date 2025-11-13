@@ -2,6 +2,7 @@ package by.furniture.store.homework4.service;
 
 import by.furniture.store.homework4.model.Order;
 import by.furniture.store.homework4.model.Product;
+import by.furniture.store.homework4.model.ReservedOrder;
 import by.furniture.store.homework4.util.Randomizer;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,13 @@ public class StoreService implements OrderConsumer, OrderProducer {
 
     public void processOrder(Order order, String workerName) throws InterruptedException {
         Thread.sleep(Randomizer.processOrderTimeout());
+
+        if (order instanceof ReservedOrder) {
+            processedOrders.add(order);
+            System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
+            return;
+        }
+
         Map<Product, Integer> deductions = new HashMap<>();
         List<Product> outOfStock = new ArrayList<>();
 

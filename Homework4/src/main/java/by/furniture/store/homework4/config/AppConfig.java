@@ -35,4 +35,9 @@ public class AppConfig {
     public List<Order> processedOrders() {
         return Collections.synchronizedList(new ArrayList<>());
     }
+
+    @Bean
+    public List<Order> canceledReservations() {
+        return Collections.synchronizedList(new ArrayList<>());
+    }
 }
