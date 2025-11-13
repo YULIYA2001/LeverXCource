@@ -1,73 +1,57 @@
 package by.furniture.store.homework4.service;
 
 import by.furniture.store.homework4.model.Order;
-import by.furniture.store.homework4.model.Product;
 import by.furniture.store.homework4.model.ReservedOrder;
 import by.furniture.store.homework4.util.Randomizer;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 @Service
 public class StoreService implements OrderConsumer, OrderProducer {
-    private final Map<Product, Integer> warehouse;
     private final BlockingQueue<Order> orderQueue;
     private final List<Order> processedOrders;
+    private final WarehouseReductionProcessor whReductionProcessor;
 
-    public StoreService(Map<Product, Integer> warehouse,
-                        BlockingQueue<Order> orderQueue,
-                        List<Order> processedOrders) {
-        this.warehouse = warehouse;
+    public StoreService(BlockingQueue<Order> orderQueue,
+                        List<Order> processedOrders,
+                        WarehouseReductionProcessor whReductionProcessor) {
         this.orderQueue = orderQueue;
         this.processedOrders = processedOrders;
+        this.whReductionProcessor = whReductionProcessor;
     }
 
     public void processOrder(Order order, String workerName) throws InterruptedException {
         Thread.sleep(Randomizer.processOrderTimeout());
 
         if (order instanceof ReservedOrder) {
-            processedOrders.add(order);
-            System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
+            processedSuccessfully(order, workerName);
             return;
         }
 
-        Map<Product, Integer> deductions = new HashMap<>();
-        List<Product> outOfStock = new ArrayList<>();
-
+        WarehouseReductionProcessor.ReductionResult rpResult = null;
         try {
-            boolean success = order.getItems().entrySet().stream()
-                    .allMatch(item -> warehouse.computeIfPresent(
-                            item.getKey(), (product, currentStock) -> {
-                                if (currentStock >= item.getValue()) {
-                                    deductions.put(product, item.getValue());
-                                    return currentStock - item.getValue();
-                                }
-                                outOfStock.add(product);
-                                return currentStock;
-                            }) != null && deductions.containsKey(item.getKey()));
+            rpResult = whReductionProcessor.reductionProcessing(order);
 
-            if (!success) {
-                rollbackDeductions(deductions);
+            if (rpResult.isFailed()) {
+                rpResult.rollbackDeductions();
                 System.out.printf("Process (%s): FAIL - #%d. %s out of stock%n",
-                        workerName, order.getOrderId(), outOfStock);
+                        workerName, order.getOrderId(), rpResult.getOutOfStock());
             } else {
-                processedOrders.add(order);
-                System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
+                processedSuccessfully(order, workerName);
             }
         } catch (Exception e) {
-            rollbackDeductions(deductions);
+            if (rpResult != null) {
+                rpResult.rollbackDeductions();
+            }
             throw e;
         }
     }
 
-    private void rollbackDeductions(Map<Product, Integer> deductions) {
-        deductions.forEach((product, quantity) ->
-                warehouse.computeIfPresent(product, (_, stock) -> stock + quantity)
-        );
+    private void processedSuccessfully(Order order, String workerName) {
+        processedOrders.add(order);
+        System.out.printf("Process (%s): SUCCESS - #%d%n", workerName, order.getOrderId());
     }
 
     public void submitOrder(Order order) {
